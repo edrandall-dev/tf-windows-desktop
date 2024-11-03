@@ -1,0 +1,7 @@
+region           = "eu-west-2"
+base_cidr_block  = "192.168.0.0/16"
+creator          = "Ed Randall"
+instance_type    = "t2.micro"
+env_prefix       = "win_srv"
+public_key_path  = "~/.ssh/win_srv_key.pem.pub"
+private_key_path = "~/.ssh/win_srv_key.pem"
