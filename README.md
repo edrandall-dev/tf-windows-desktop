@@ -93,3 +93,48 @@ This configuration is intentionally simplified for a quick dev environment and d
 - **Security Group**: By default, this configuration restricts RDP access to your IP only. However, if IP retrieval fails, the configuration won’t apply correctly. Re-run Terraform once your IP can be retrieved.
 - **Password Handling**: The password is decrypted and displayed in Terraform’s output. 
 - **Environment Teardown**: Always run `terraform destroy` when you’re finished to prevent lingering charges and minimise exposure.
+
+## Further Changes
+If you want to create custom AMI for use each time which includes some customisations, then the following files can be modified:
+
+```
+#instance.tf
+resource "aws_instance" "win_srv_instance" {
+  //Generic Windows 2022 Server AMI
+  //ami                    = "ami-05bfeaa616a095c81"
+  //get_password_data      = true
+  
+  //My own customised Windows 2022 Server AMI
+  ami = "ami-0e43f9f00673b162e"
+  get_password_data      = false
+
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.win_srv_public_subnet.id
+  vpc_security_group_ids = ["${aws_security_group.win_srv_sg.id}"]
+  key_name               = aws_key_pair.win_srv_key.id
+
+  tags = {
+    "Name"      = "${var.env_prefix}_instance"
+    "Creator"   = var.creator
+    "Terraform" = true
+  }
+}
+
+#outputs.tf
+output "rdp_connection_info" {
+  value = <<-EOT
+    RDP Connection Details:
+    -----------------------
+    Full Address: ${aws_instance.win_srv_instance.public_ip}
+    Username: Administrator
+    //Password: ${rsadecrypt(aws_instance.win_srv_instance.password_data, file("~/.ssh/win_srv_key.pem"))}
+
+    Instructions:
+    1. Open your RDP client (e.g., Microsoft Remote Desktop).
+    2. Enter the 'Full Address' above as the host IP.
+    3. Use the 'Username' and 'Password' provided.
+    4. When prompted, accept any certificate warnings to proceed.
+    EOT
+  sensitive = false
+}
+```
