@@ -28,8 +28,8 @@ The security group is set up to allow RDP access only from your current IP addre
 ## Usage
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/edrandall-dev/tf-windows-desktop
+   cd tf-windows-desktop
    ```
 
 2. **Set up variables**:
@@ -57,7 +57,7 @@ The security group is set up to allow RDP access only from your current IP addre
    ```
    Confirm by typing `yes` when prompted.
 
-6. **Tear down the environment when done**:
+6. **Tear down the environment**:
    ```bash
    terraform destroy
    ```
