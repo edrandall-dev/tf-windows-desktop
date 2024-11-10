@@ -1,43 +1,29 @@
 # AWS Windows Server Deployment with Terraform
 
-This repository contains a set of Terraform configurations to deploy a Windows Server instance on AWS. The setup provisions a secure infrastructure with a VPC, subnet, internet gateway, route table, and a security group configured for RDP access. The configuration also sets up an SSH key pair for secure access and outputs the necessary information for RDP connection.
-
-## Table of Contents
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Use Case](#use-case)
-- [Prerequisites](#prerequisites)
-- [Usage](#usage)
-- [Outputs](#outputs)
-- [Security Considerations](#security-considerations)
+This is a simple Terraform configuration for deploying a Windows Server instance on AWS—a useful setup if you occasionally need a quick Windows environment for testing, development, or troubleshooting. It provisions a basic infrastructure including a VPC, subnet, and an RDP-accessible Windows Server instance. Access is restricted to your own IP address to provide a reasonable layer of security without over-complicating things.
 
 ## Overview
-This Terraform project sets up the following AWS infrastructure components:
-- A **VPC** with DNS support.
-- A **public subnet** for the Windows Server instance.
-- An **Internet Gateway** for external connectivity.
-- A **route table** and **route table association** to route internet traffic.
-- A **security group** configured to allow RDP access.
-- A **Windows Server EC2 instance** with RDP access enabled and password retrieval capability.
-- **Key pair generation** to secure access.
-
-## Architecture
-The deployed architecture includes:
-- **VPC**: A custom VPC for the environment.
-- **Subnet**: A public subnet within the VPC.
-- **Internet Gateway**: Provides internet connectivity to the subnet.
-- **Security Group**: Configured for RDP (port 3389) access.
-- **EC2 Instance**: A Windows Server instance deployed in the public subnet.
+This Terraform project sets up the following AWS components:
+- A **VPC** with DNS support for network isolation.
+- A **public subnet** to house the Windows Server instance.
+- An **Internet Gateway** for internet connectivity.
+- A **route table** to handle internet routing for the subnet.
+- A **security group** configured to allow RDP access, restricted to your current IP address.
+- A **Windows Server EC2 instance** with AWS-managed password retrieval.
+- **Key pair configuration** for secure access.
 
 ## Use Case
-This Terraform configuration is ideal for those who need a temporary Windows environment for testing, development, or troubleshooting purposes. It allows for quick provisioning of a Windows Server that can be used without incurring costs if the **AWS Free Tier** is utilised. To avoid unexpected charges, it is recommended to set up a **billing alarm** in AWS when creating a new account. Additionally, ensure that the Terraform environment is torn down when not in use to prevent any costs from being incurred.
+This setup is intended for short-term, dev-oriented use cases. It’s perfect if you need a Windows server quickly but don’t want to commit to a permanent setup. If you’re using the **AWS Free Tier**, you can avoid incurring extra costs. However, I recommend setting up a **billing alarm** in AWS and tearing down the environment when you're finished to avoid any unexpected charges. 
 
 ## Prerequisites
-Before using this Terraform configuration, ensure you have:
-- **Terraform** installed on your local machine.
-- **AWS CLI** configured with the necessary credentials.
-- An **existing public SSH key** for EC2 key pair creation.
-- Necessary permissions in your AWS account to create VPCs, subnets, EC2 instances, etc.
+To use this Terraform configuration, ensure you have:
+- **Terraform** installed on your machine.
+- **AWS CLI** configured with necessary credentials.
+- An **existing public SSH key** for creating the EC2 key pair.
+- Sufficient permissions in AWS to create VPCs, subnets, and EC2 instances.
+
+## Restricting Access to Your IP Address
+The security group is set up to allow RDP access only from your current IP address. This is achieved by using the public IP returned by `icanhazip.com`. Note that if this HTTP request fails, Terraform won’t be able to retrieve your IP address, and the setup may fail. You’ll need to re-run `terraform apply` once the IP retrieval is successful.
 
 ## Usage
 1. **Clone the repository**:
@@ -46,8 +32,8 @@ Before using this Terraform configuration, ensure you have:
    cd <repository-directory>
    ```
 
-2. **Update variables**:
-   Modify the `terraform.tfvars` or pass variables using the command line to set the appropriate values for:
+2. **Set up variables**:
+   Update the `terraform.tfvars` or specify variables on the command line for:
    - `region`
    - `base_cidr_block`
    - `creator`
@@ -69,16 +55,16 @@ Before using this Terraform configuration, ensure you have:
    ```bash
    terraform apply
    ```
-   Confirm the plan by typing `yes` when prompted.
+   Confirm by typing `yes` when prompted.
 
 6. **Tear down the environment when done**:
    ```bash
    terraform destroy
    ```
-   This will ensure that resources are terminated, reducing the risk of any costs being incurred.
+   This will delete all resources to avoid unwanted costs.
 
 ## Outputs
-The configuration provides an output with the necessary details for connecting to the Windows Server instance:
+After applying the configuration, you’ll get an output with the necessary details for RDP access:
 
 ```hcl
 output "rdp_connection_info" {
@@ -99,13 +85,14 @@ output "rdp_connection_info" {
 }
 ```
 
-**Note**: The output `rdp_connection_info` will display sensitive information. Ensure you handle this output securely.
+**Note**: This output includes sensitive information, so handle it securely.
 
 ## Security Considerations
-- **Key Management**: Keep your private key file secure and restrict access to it.
-- **Security Group**: The provided security group configuration allows RDP access from any IP (`0.0.0.0/0`). Modify this for more restricted access (e.g., your IP only) for improved security.
-- **Password Handling**: The `rsadecrypt` function decrypts the Windows Administrator password and outputs it. Handle this password securely and ensure that only authorised personnel have access.
-- **Billing Alarms**: Set up an AWS billing alarm to monitor usage and avoid unexpected charges.
-- **Environment Teardown**: Always run `terraform destroy` after completing your tasks to ensure that resources are deleted and no unnecessary charges are incurred.
-- **Certificate Warnings**: Users will encounter a certificate warning when connecting to the RDP session. Ensure you trust the server and accept the certificate prompt to proceed.
-
+This configuration is intentionally simplified for a quick dev environment and doesn’t follow all production-level security practices. Here’s a rundown of the security setup:
+- **Key Management**: Keep your private key secure, as it’s required to decrypt the AWS-provided Windows Administrator password.
+- **Security Group**: By default, this configuration restricts RDP access to your IP only. However, if IP retrieval fails, the configuration won’t apply correctly. Re-run Terraform once your IP can be retrieved.
+- **Password Handling**: The password is decrypted and displayed in Terraform’s output. Ensure only authorised individuals can access this output.
+- **Environment Teardown**: Always run `terraform destroy` when you’re finished to prevent lingering charges and minimise exposure.
+  
+## Conclusion
+This Terraform configuration provides a quick and easy way to spin up a Windows Server on AWS with basic networking and security setup, ideal for development and testing. It’s not intended for production but is a convenient solution for temporary use. Happy testing!
