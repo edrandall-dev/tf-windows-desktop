@@ -91,8 +91,5 @@ output "rdp_connection_info" {
 This configuration is intentionally simplified for a quick dev environment and doesn’t follow all production-level security practices. Here’s a rundown of the security setup:
 - **Key Management**: Keep your private key secure, as it’s required to decrypt the AWS-provided Windows Administrator password.
 - **Security Group**: By default, this configuration restricts RDP access to your IP only. However, if IP retrieval fails, the configuration won’t apply correctly. Re-run Terraform once your IP can be retrieved.
-- **Password Handling**: The password is decrypted and displayed in Terraform’s output. Ensure only authorised individuals can access this output.
+- **Password Handling**: The password is decrypted and displayed in Terraform’s output. 
 - **Environment Teardown**: Always run `terraform destroy` when you’re finished to prevent lingering charges and minimise exposure.
-  
-## Conclusion
-This Terraform configuration provides a quick and easy way to spin up a Windows Server on AWS with basic networking and security setup, ideal for development and testing. It’s not intended for production but is a convenient solution for temporary use. Happy testing!
