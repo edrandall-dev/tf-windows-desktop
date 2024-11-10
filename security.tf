@@ -2,14 +2,13 @@ resource "aws_security_group" "win_srv_sg" {
   name   = "win_srv_sg"
   vpc_id = aws_vpc.win_srv_vpc.id
 
-
   # RDP access from anywhere, uncomment if needed
-
   ingress {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    #cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
   }
 
   # No restrictions on traffic originating from inside the VPC
